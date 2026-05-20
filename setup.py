@@ -14,7 +14,7 @@ setuptools.setup(
     name="carbary_auroral_model",
     version=version,
     author="Maksim Tulin",
-    description="",
+    description="Python implementation for J.F. Carbary auroral oval model (2005)",
     long_description=readme,
     long_description_content_type="text/markdown",
     url="https://github.com/mmatroskin/carbary_auroral_model",
@@ -27,10 +27,12 @@ setuptools.setup(
     include_package_data=True,
     license_files=["LICENSE"],
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 3 - Alpha",
         "Environment :: Web Environment",
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
+        "Topic :: Scientific/Engineering",
+        "Topic :: Scientific/Engineering :: Astronomy",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
@@ -38,7 +40,8 @@ setuptools.setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
-        "Programming Language :: Python :: 3.13",
+        # "Programming Language :: Python :: 3.13",  # check cartopy
+        # "Programming Language :: Python :: 3.14",  # check cartopy
         "Programming Language :: Python :: 3 :: Only",
     ],
     python_requires=">=3.10",
