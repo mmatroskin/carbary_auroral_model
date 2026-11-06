@@ -2,16 +2,35 @@
 
 ## Description
 
-This python package conatins auroral oval model, developed by Carbary J. F. (2005). 
+Python implementation of the statistical Kp-based auroral oval model by **James F. Carbary (2005)**
+
+Implements the Model, described in the original Carbary J. F. publication "A Kp-based model of auroral boundaries" (SPACE WEATHER, VOL. 3, S10001, doi:10.1029/2005SW000162, 2005)
+
+>Citation: Carbary, J. F. (2005), A Kp-based model of auroral boundaries, Space Weather, 3, S10001, doi:10.1029/2005SW000162.
+
+## What this package does
 
 The statistical model allows calculation of the auroral boundaries at most MLTs as a function of Kp and can serve as an approximation to the shape and extent of the statistical oval. 
 The model take Kp geomagnetic index and magnetic local time (mlt) as input and produce the peak, poleward and equatorward boundaries of the auroral oval.
 
-Implements the Model, described in the original Carbary J. F. publication "A Kp-based model of auroral boundaries" (SPACE WEATHER, VOL. 3, S10001, doi:10.1029/2005SW000162, 2005)
+The relations are linear:
 
-Citation: Carbary, J. F. (2005), A Kp-based model of auroral boundaries, Space Weather, 3, S10001, doi:10.1029/2005SW000162.
+```text
+boundary(MLT) = C0(MLT) + C1(MLT) × Kp
+```
 
-***Python 3.10+ requires***
+Coefficients are taken directly from Tables 1–4 of the original paper.
+
+## Model limitations
+
+- Best performance for **Kp < 6**. At higher Kp the linear fits deteriorate.
+- No reliable coefficients for several daytime MLT hours (roughly 9–13).
+- The conversion from magnetic to geographic coordinates uses a simple tilted-dipole approximation.
+
+## Requirements
+
+- Python ≥ 3.10
+- numpy
 
 ## Classes and Methods
 
@@ -20,11 +39,20 @@ Library provides **AuroralBoundary** class describing Auroral oval for using in 
 ### AuroralBoundary.intensity_map
 
 The field contains Intensity in every point belongs the auroral oval.
-Returns numpy ndarray of lists **[longitude, latitude, intense]**. 
+Returns numpy ndarray of lists **[longitude, latitude, intensity]**.
 
 ## How to use
 
+### Installation
+
+```bash
+pip install carbary_auroral_model
+```
+
+### Usage Example
+
 ```python
+import datetime
 from carbary_model import AuroralBoundary
 
 boundary = AuroralBoundary(kp=5.2,
@@ -32,3 +60,6 @@ boundary = AuroralBoundary(kp=5.2,
                            advanced_mode=True)
 
 ```
+
+## License
+MIT License.
