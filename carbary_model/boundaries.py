@@ -1,38 +1,45 @@
+"""
+The Interface builds an auroral oval with geographic coordinates.
+"""
 from dataclasses import asdict
 
 import numpy as np
 
+from carbary_model.exceptions import UnexpectedError
 from carbary_model.carbary_model import CarbaryAuroralModel
-from carbary_model.types import AuroraBondarySector, Point, AuroraBondaryData
-from carbary_model.const import grad_in_sector, mag_pole_lon
-from carbary_model.utils import mlat_to_glat_approx, get_intense_gauss, get_intense_linear
+from carbary_model.types import AuroraBoundarySector, Point, AuroraBoundaryData
+from carbary_model.const import GRAD_IN_SECTOR
+from carbary_model.utils import mlat_to_glat_approx, get_intense_gauss, get_intense_linear, get_mag_pole
 
 
 class AuroralBoundary:
     """Auroral oval class"""
     _mlt_sectors = 24
     _size = 360
-    _model = CarbaryAuroralModel
-    boundaries: dict[int, AuroraBondarySector] = {}
+    _shift = 180  # shift to 00 MLT
+    _model: CarbaryAuroralModel = CarbaryAuroralModel
+    pole: Point
+    boundaries: dict[int, AuroraBoundarySector] = {}
 
     def __init__(self, kp: float, ut_hours: float = 0.0, advanced_mode: bool = False):
         self._is_advanced = advanced_mode
+        self.pole = get_mag_pole()
         for i in range(self._size):
             # i (0-359) - glon
             glon = float(i)
 
             # calculations:
             # MLT = (([lon] - [mag pole lon] + 180 + ([time UTC] * 15)) % 360) / 15
-            # 180 - shift to 00 MLT
+            # 180 - ç
             # 15 - hourly meridian rotation (15 degrees)
 
-            mlt_sector = int((glon - mag_pole_lon + 180.0 + (ut_hours * grad_in_sector)) % self._size // grad_in_sector)
+            mlt_sector = int((glon - self.pole.lon + 180.0 + (ut_hours * GRAD_IN_SECTOR)) % self._size // GRAD_IN_SECTOR)
             data = self._model().get_boundaries(kp, mlt_sector)
             self.boundaries[i] = self._get_boundaries_geographic(glon, data)
 
     def _get_boundaries_geographic(self,
                                    glon: float,
-                                   data: AuroraBondaryData) -> AuroraBondarySector:
+                                   data: AuroraBoundaryData) -> AuroraBoundarySector:
         """
         Geographic coordinates for boundary:
             longitude: 0–359
@@ -48,16 +55,16 @@ class AuroralBoundary:
                 result_dict[key] = None
                 continue
 
-            glat = mlat_to_glat_approx(mlat, glon)
+            glat = mlat_to_glat_approx(mlat, glon, self.pole)
 
             result_dict[key] = Point(
                 lon=int(round(glon)),  # longitude 0-359
                 lat=int(round(glat))  # latitude -90..90
             )
-        result = AuroraBondarySector(**result_dict)
+        result = AuroraBoundarySector(**result_dict)
         if result.peak and not result.po_boundary and not result.eq_boundary:
             result.eq_boundary = result.po_boundary = result.peak
-        return AuroraBondarySector(**result_dict)
+        return result
 
     @property
     def intensity_map(self) -> np.ndarray:
