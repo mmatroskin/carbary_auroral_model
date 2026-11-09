@@ -45,10 +45,6 @@ WGS84 Earth ellipsoid flattening factor used for Geo coordinates calculation
 https://en.wikipedia.org/wiki/Earth_ellipsoid
 """
 
-# Geomagnetic North Pole (2025)
-geo_mag_pole_lat: float = 80.85
-geo_mag_pole_lon: float = -72.76 + 360
-
 # WMM2025
 MAG_POLE_LOCATION_DEFAULT: dict = {"lat": 85.762, "lon": 139.298}
 
@@ -69,5 +65,12 @@ MIN_INTENSE: int = 4
 # Valid Kp range for the model
 KP_MIN: float = 0.0
 KP_MAX: float = 9.0
+
+# Geomagnetic North Pole (2025)
+geo_mag_pole_lat: float = 80.85
+geo_mag_pole_lon: float = -72.76 + 360
+
+# WGS84 ellipsoid flattening factor
+WGS84_FLAT_COEF: float = 1 / 298.257223563
 
 WMM_COEF_DATA_SOURCE: str = "WMM.COF"

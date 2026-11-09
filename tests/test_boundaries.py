@@ -11,14 +11,26 @@ def test_auroral_boundary_sectors():
 
 
 def test_auroral_boundary_points():
-    boundary = AuroralBoundary(kp=5.2, ut_hours=0.0)
-    shift = 0
+    boundary = AuroralBoundary(kp=5.2, ut_hours=0.0, strict_mode=True)
+    assert len(boundary.boundaries) == 360
+    res = []
+    for k, v in boundary.boundaries.items():
+        if v.peak is None:
+            res.append(k)
+    assert len(res) > 0
 
-    sector = boundary.boundaries[shift]
+    initial = 0
+    shift = 270
+
+    sector = boundary.boundaries[initial]
 
     assert sector.peak is not None
     assert 0 <= sector.peak.lon <= 359
     assert 0 <= sector.peak.lat <= 90
+
+    sector = boundary.boundaries[shift]
+
+    assert sector.peak is None
 
 
 def test_auroral_boundary_intensity_map():
