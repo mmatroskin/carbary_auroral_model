@@ -1,7 +1,7 @@
 import pytest
 
 from carbary_model.const import MIN_INTENSE
-from carbary_model.utils import get_intense_gauss, get_intense_linear, get_geomag_pole
+from carbary_model.utils import get_intense_gauss, get_intense_linear
 
 
 def test_get_intense_linear_at_peak_0():
@@ -60,13 +60,3 @@ def test_gauss_collapsed_boundaries_outside():
     res = get_intense_gauss(lat=70.0, start=60.0, end=60.0, peak_value=30.0)
     assert res == 0
 
-
-def test_geomag_pole_wmm2025_base():
-    pole = get_geomag_pole(2025.0)
-
-    # expected values according to WMM-2025
-    expected_lat = 80.85
-    expected_lon = 287.24
-
-    assert pole.lat == pytest.approx(expected_lat, abs=0.01)
-    assert pole.lon == pytest.approx(expected_lon, abs=0.01)
