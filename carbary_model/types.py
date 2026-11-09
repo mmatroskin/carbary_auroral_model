@@ -1,14 +1,15 @@
 from dataclasses import dataclass
+from enum import Enum, IntEnum
 
 
 @dataclass
 class Point:
-    lat: int
-    lon: int
+    lat: float
+    lon: float
 
 
 @dataclass
-class AuroraBondaryData:
+class AuroraBoundaryData:
     eq_boundary: float | None
     peak: float | None
     po_boundary: float | None
@@ -16,8 +17,15 @@ class AuroraBondaryData:
 
 
 @dataclass
-class AuroraBondarySector:
+class AuroraBoundarySector:
     eq_boundary: Point | None
     peak: Point | None
     po_boundary: Point | None
     peak_intensity: float | None
+
+
+class PoleType(IntEnum):
+    """Pole type (for experiments)"""
+    CGM = 0
+    GEOMAGNETIC = 1
+    MAGNETIC = 2
