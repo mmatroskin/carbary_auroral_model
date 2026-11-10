@@ -1,17 +1,19 @@
 import numpy as np
+import pytest
 
 from carbary_model import AuroralBoundary
-from carbary_model.types import PoleType
 
 
-def test_auroral_boundary_sectors():
-    boundary = AuroralBoundary(kp=5.2, ut_hours=12.0)
+@pytest.mark.parametrize("strict_mode", [True, False])
+def test_auroral_boundary_sectors(strict_mode):
+    boundary = AuroralBoundary(kp=5.2, ut_hours=12.0, strict_mode=strict_mode)
 
     assert len(boundary.boundaries) == 360
 
 
-def test_auroral_boundary_points():
-    boundary = AuroralBoundary(kp=5.2, ut_hours=0.0, strict_mode=True)
+@pytest.mark.parametrize("strict_mode", [True, False])
+def test_auroral_boundary_points(strict_mode):
+    boundary = AuroralBoundary(kp=5.2, ut_hours=0.0, strict_mode=strict_mode)
     assert len(boundary.boundaries) == 360
     res = []
     for k, v in boundary.boundaries.items():
@@ -20,7 +22,7 @@ def test_auroral_boundary_points():
     assert len(res) > 0
 
     initial = 0
-    shift = 270
+    shift = 180
 
     sector = boundary.boundaries[initial]
 
@@ -33,8 +35,9 @@ def test_auroral_boundary_points():
     assert sector.peak is None
 
 
-def test_auroral_boundary_intensity_map():
-    boundary = AuroralBoundary(kp=5.2)
+@pytest.mark.parametrize("strict_mode", [True, False])
+def test_auroral_boundary_intensity_map(strict_mode):
+    boundary = AuroralBoundary(kp=5.2, strict_mode=strict_mode)
 
     assert isinstance(boundary.intensity_map, np.ndarray)
     assert boundary.intensity_map.ndim == 2
