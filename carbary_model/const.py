@@ -78,6 +78,4 @@ WMM_COEF_DATA_SOURCE: str = "WMM.COF"
 # https://gml.noaa.gov/grad/solcalc/glossary.html
 # The solar declination varies from -23.44° at the (northern hemisphere) winter solstice,
 # through 0° at the vernal equinox, to +23.44° at the summer solstice
-# More:
-# https://www.pveducation.org/pvcdrom/properties-of-sunlight/declination-angle
 SUN_DECLINATION: float = 24.45

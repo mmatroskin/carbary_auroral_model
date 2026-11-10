@@ -4,7 +4,7 @@ import setuptools
 from carbary_model.__version__ import version
 
 
-package_data = {"carbary_auroral_model": ["CHANGELOG.md", "LICENSE"]}
+package_data = {"carbary_auroral_model": ["CHANGELOG.md", "LICENSE", "WWM.COF"]}
 readme = pathlib.Path("README.md").read_text()
 history = pathlib.Path("CHANGELOG.md").read_text()
 description = f"{readme}\n\n## Changelog\n\n{history}"
@@ -27,7 +27,7 @@ setuptools.setup(
     include_package_data=True,
     license_files=["LICENSE"],
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Environment :: Web Environment",
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
@@ -40,8 +40,8 @@ setuptools.setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
-        # "Programming Language :: Python :: 3.13",  # check cartopy
-        # "Programming Language :: Python :: 3.14",  # check cartopy
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
         "Programming Language :: Python :: 3 :: Only",
     ],
     python_requires=">=3.10",

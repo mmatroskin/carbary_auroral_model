@@ -17,7 +17,7 @@ class AuroralBoundary:
     _mlt_sectors: int = 24
     _size: int = 360
     _shift: int = 180  # shift to 00 MLT
-    _model: type[CarbaryAuroralModel] = CarbaryAuroralModel
+    _model: CarbaryAuroralModel
     pole: Point
     boundaries: dict[int, AuroraBoundarySector]
     ut_hours: float
@@ -28,6 +28,13 @@ class AuroralBoundary:
                  advanced_mode: bool = False,
                  strict_mode: bool = False,
                  smooth_mode: int = 0):
+        """Auroral oval representation class constructor.
+        :param kp: Kp value
+        :param ut_hours: current time (hours)
+        :param advanced_mode: Gaussian (if True) or linear interpolation in use
+        :param strict_mode: Magnetic jr GeoMagnetic Pole in use. False (default value) is preferable
+        :param smooth_mode: Smooth mode for Intensity map. 0 - no smoothing, 1 or 2 - 1D or 2D smoothing in use
+        """
         try:
             self._smooth_mode = SmoothMode(smooth_mode)
         except ValueError as exc:
@@ -36,6 +43,7 @@ class AuroralBoundary:
         self.ut_hours = ut_hours
         self.pole = get_geomag_pole() if strict_mode else get_mag_pole()
         self.boundaries = {}
+        self._model = CarbaryAuroralModel()
 
         mlon_sun = get_sun_mlon(self._shift, self.ut_hours, self._size, self.pole)
         
@@ -52,7 +60,7 @@ class AuroralBoundary:
             mlt = (mlon - mlon_sun + self._shift) % self._size
             mlt_sector = int(mlt // GRAD_IN_SECTOR) % self._mlt_sectors
 
-            data = self._model().get_boundaries(kp, mlt_sector)
+            data = self._model.get_boundaries(kp, mlt_sector)
             self.boundaries[i] = self._get_boundaries_geographic(glon, mlon, data)
 
     def _get_boundaries_geographic(self,
