@@ -5,15 +5,24 @@ GeoMagnetic pole location
 ----------------------
 North GeoMagnetic Pole position calculation bases on The US/UK World Magnetic Model for 2025-2030:
 https://www.ncei.noaa.gov/products/world-magnetic-model/wmm-coefficients
+
+The solar declination
+----------------------
+# https://gml.noaa.gov/grad/solcalc/solareqns.PDF
+# https://www.pveducation.org/pvcdrom/properties-of-sunlight/declination-angle
 """
 import math
-import pathlib
 from datetime import datetime, UTC
+import functools
+import pathlib
 
-from carbary_model.exceptions import InvalidMLTError, InvalidKpError
+import numpy as np
+from scipy.ndimage import gaussian_filter, gaussian_filter1d
+
+from carbary_model.exceptions import InvalidMLTError, InvalidKpError, UnexpectedError
 from carbary_model.const import MIN_INTENSE, MAG_POLE_LOCATION, MAG_POLE_LOCATION_DEFAULT, KP_MAX, KP_MIN, \
-    WMM_COEF_DATA_SOURCE, WGS84_FLAT_COEF
-from carbary_model.types import Point
+    WMM_COEF_DATA_SOURCE, WGS84_FLAT_COEF, SUN_DECLINATION, GRAD_IN_SECTOR
+from carbary_model.types import AuroraBoundarySector, Point
 
 
 def magnetic_to_geographic(mlat: float, mlon: float, pole: Point) -> Point:
@@ -42,6 +51,7 @@ def magnetic_to_geographic(mlat: float, mlon: float, pole: Point) -> Point:
 
 def glon_to_mlon_approx(glon: float, pole: Point) -> float:
     """Geographic to Magnetic longitude conversion using the tilted dipole model."""
+
     pole_lat_rad = math.radians(pole.lat)
     pole_lon_rad = math.radians(pole.lon)
     glon_rad = math.radians(glon)
@@ -55,6 +65,7 @@ def glon_to_mlon_approx(glon: float, pole: Point) -> float:
 
 def mlat_mlon_to_glat_approx(mlat: float, mlon: float, pole: Point) -> float:
     """Magnetic coordinates to geographic latitude conversion using the tilted dipole model."""
+
     mlat_rad = math.radians(mlat)
     pole_lat_rad = math.radians(pole.lat)
     mlon_rad = math.radians(mlon)
@@ -73,6 +84,7 @@ def get_intense_linear(lat: float,
                        peak_value: float,
                        min_val: float = MIN_INTENSE) -> float:
     """Simple intensity in point calculation (linear)"""
+
     if start is None:
         return min_val if lat == end else 0
     return (peak_value - MIN_INTENSE) * abs(lat - start) / abs(end - start) + MIN_INTENSE if end != start else 0
@@ -113,22 +125,26 @@ def get_intense_gauss(lat: float,
 
 def validate_kp(kp: float) -> None:
     """Validates kp value"""
+
     if not (KP_MIN <= kp <= KP_MAX):
         raise InvalidKpError(f"Kp must be in [{KP_MIN}, {KP_MAX}], got {kp}")
 
 
 def validate_mlt(mlt: float) -> None:
     """Validates mlt value"""
+
     if not (0.0 <= mlt < 24.0):
         raise InvalidMLTError(f"MLT must be in [0, 24), got {mlt}")
 
 
 def get_mag_pole() -> Point:
     """Coordinates of North Magnetic Pole"""
+
     point = MAG_POLE_LOCATION.get(datetime.now(UTC).year) or MAG_POLE_LOCATION_DEFAULT
     return Point(**point)
 
 
+@functools.lru_cache(maxsize=1)
 def get_wmm_coeffs():
     """Returns g10, g11, h11 from WMM.COF"""
 
@@ -162,9 +178,8 @@ def get_wmm_coeffs():
 
 def get_decimal_year(date: datetime) -> float:
     """Returns decimal year value
-        params:
-            date: datetime (with UTC)
-        returns: decimal year value (float)
+        :param date: datetime (with UTC)
+        :returns: decimal year value (float)
     """
 
     start_year = datetime(date.year, 1, 1, tzinfo=UTC)
@@ -177,6 +192,7 @@ def get_decimal_year(date: datetime) -> float:
 
 def get_geomag_pole(date: float | None = None) -> Point:
     """Coordinates of North Geomagnetic Pole"""
+
     date = date or get_decimal_year(datetime.now(UTC))
     wmm_coeffs = get_wmm_coeffs()
     delta = date - wmm_coeffs.get("base_year")
@@ -201,3 +217,67 @@ def get_geomag_pole(date: float | None = None) -> Point:
     lat_rad = math.atan(math.tan(math.radians(lat_geocentric)) / (1 - e2))
 
     return Point(lat=math.degrees(lat_rad), lon=lon)
+
+
+def get_sun_declination(day_num: int | None = None) -> float:
+    """Returns sun declination value for given day of year by Cooper formula
+    https://www.pveducation.org/pvcdrom/properties-of-sunlight/declination-angle
+    :param day_num: day number (1-365)
+    :returns: declination value in degrees (float)
+    """
+
+    day_num = day_num or int(datetime.now(UTC).strftime('%j'))
+    return -SUN_DECLINATION * math.cos(math.radians((360 / 365) * (day_num + 10)))
+
+def get_sun_mlon(shift: int,
+                 ut_hours: float,
+                 size: int,
+                 pole: Point) -> float:
+    """Returns sun magnetic longitude"""
+
+    sun_glat = get_sun_declination()
+    sun_glon = (shift - ut_hours * GRAD_IN_SECTOR) % size
+
+    sun_lat_rad = math.radians(sun_glat)
+    sun_lon_rad = math.radians(sun_glon)
+    pole_lat_rad = math.radians(pole.lat)
+    pole_lon_rad = math.radians(pole.lon)
+
+    y_sun = math.cos(sun_lat_rad) * math.sin(sun_lon_rad - pole_lon_rad)
+    x_sun = (math.cos(sun_lat_rad) * math.cos(sun_lon_rad - pole_lon_rad) * math.sin(pole_lat_rad)
+             - math.sin(sun_lat_rad) * math.cos(pole_lat_rad))
+
+    return math.degrees(math.atan2(y_sun, x_sun)) % size
+
+
+def get_smooth_gauss(data: np.ndarray,
+                     x: int,
+                     y: int,
+                     mode_2d: bool,
+                     sigma_x: float = 2.0,
+                     sigma_y: float = 1.0) -> np.ndarray:
+    """Returns grid of values smoothed by gaussian_filter"""
+
+    grid = np.zeros((x, y))
+
+    for row in data:
+        lon_idx = int(round(row[0])) % x
+        lat_idx = int(round(row[1] + (y // 2))) % y
+        intense = row[2]
+        # max intense
+        grid[lon_idx, lat_idx] = max(grid[lon_idx, lat_idx], intense)
+
+    # apply gaussian filter, mode=['wrap', 'constant'] for 2D, 'wrap' for another case
+    # TODO: simplify
+    smoothed_grid = gaussian_filter(grid, sigma=[sigma_x, sigma_y], mode=['wrap', 'constant']) if mode_2d \
+        else gaussian_filter1d(grid, sigma=sigma_x, axis=0, mode='wrap')
+
+    result = []
+    lons, lats = np.where(smoothed_grid > MIN_INTENSE)
+
+    for lon, lat in zip(lons, lats):
+        # step 0.5 for original grid imitation
+        result.append([float(lon), float(lat - (y // 2)), smoothed_grid[lon, lat]])
+        result.append([float(lon), float(lat - (y // 2)) + 0.5, smoothed_grid[lon, lat]])
+
+    return np.array(result)

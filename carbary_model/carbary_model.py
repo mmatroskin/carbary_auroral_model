@@ -20,7 +20,7 @@ class CarbaryAuroralModel:
     _hours: int = 24
     data: CarbaryTableCoeffsData = CarbaryTableCoeffsData()
 
-    def get_boundaries(self, kp: float, mlt: float) -> AuroraBoundaryData:
+    def get_boundaries(self, kp: float, mlt: int) -> AuroraBoundaryData:
         """Returns auroral boundaries and peak for Kp и MLT."""
         return AuroraBoundaryData(
             eq_boundary=self.get_equatorward_boundary(kp, mlt),

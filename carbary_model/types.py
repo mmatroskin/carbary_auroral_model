@@ -28,3 +28,10 @@ class PoleType(IntEnum):
     """Pole type (for experiments)"""
     GEOMAGNETIC = 0
     MAGNETIC = 1
+
+
+class SmoothMode(IntEnum):
+    """Smooth Mode (for experiments)"""
+    NONE = 0
+    PARTIAL = 1
+    FULL = 2
