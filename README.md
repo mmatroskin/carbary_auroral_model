@@ -74,7 +74,7 @@ data = {
 
 ### FYI
 
-> Note on Coordinate Systems: Dynamic Geomagnetic Pole calculation via WMM Gauss coefficients was excluded from the 0.1.0 release. R&D validation confirmed that the default Magnetic Dip Pole framework yields more consistent results with the original Carbary (2005) model. The selection pole types code is preserved in the `feature/pole_variety_dev` branch for reference.
+> Note on Coordinate Systems: Dynamic Geomagnetic Pole calculation via WMM Gauss coefficients was excluded from the 0.1.0 release. R&D validation confirmed that the default Magnetic Dip Pole framework yields more consistent results with the original Carbary (2005) model. The selection pole types code is preserved in the `feature/pole-variety-dev` branch for reference.
 >
 > The selection pole types feature included in 0.1.1.dev0 release
 > 
