@@ -33,6 +33,7 @@ Coefficients are taken directly from Tables 1–4 of the original paper.
 
 - Python ≥ 3.10
 - numpy
+- scipy
 
 ## Classes and Methods
 
