@@ -4,7 +4,6 @@
 - Detailed Magnetic Pole locations (2025-2030)
 #### added
 = Smoothing for Intensity map representation
-- Geomagnetic Pole location calculation (2025-2030)
 - Tests
 #### fixed
 - Geographic - Magnetic coordinates conversion
