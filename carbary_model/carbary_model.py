@@ -20,7 +20,7 @@ class CarbaryAuroralModel:
     _hours: int = 24
     data: CarbaryTableCoeffsData = CarbaryTableCoeffsData()
 
-    def get_boundaries(self, kp: float, mlt: float) -> AuroraBoundaryData:
+    def get_boundaries(self, kp: float, mlt: int) -> AuroraBoundaryData:
         """Returns auroral boundaries and peak for Kp и MLT."""
         return AuroraBoundaryData(
             eq_boundary=self.get_equatorward_boundary(kp, mlt),
@@ -29,13 +29,12 @@ class CarbaryAuroralModel:
             peak_intensity=self.get_peak_intensity(kp, mlt))
 
     def _get_coeffs(self,
-                    mlt: float,
+                    mlt: int,
                     coeffs_dict: dict[int, tuple[float, float]]) -> tuple[float, float] | None:
         """Coefficients for nearest MLT (rounded)."""
-        mlt_int = int(round(mlt)) % self._hours
-        return coeffs_dict.get(mlt_int)  # No boundaries for 9-12 MLT
+        return coeffs_dict.get(mlt)  # None for 9-12 MLT
 
-    def get_equatorward_boundary(self, kp: float, mlt: float) -> float | None:
+    def get_equatorward_boundary(self, kp: float, mlt: int) -> float | None:
         """Equatorward (EQ) point (mlat, degrees)."""
         validate_kp(kp)
         validate_mlt(mlt)
@@ -45,7 +44,7 @@ class CarbaryAuroralModel:
         c0, c1 = coeffs
         return c0 + c1 * kp
 
-    def get_peak_line(self, kp: float, mlt: float) -> float | None:
+    def get_peak_line(self, kp: float, mlt: int) -> float | None:
         """Peak (PK) point (mlat, degrees)."""
         validate_kp(kp)
         validate_mlt(mlt)
@@ -55,7 +54,7 @@ class CarbaryAuroralModel:
         c0, c1 = coeffs
         return c0 + c1 * kp
 
-    def get_poleward_boundary(self, kp: float, mlt: float) -> float | None:
+    def get_poleward_boundary(self, kp: float, mlt: int) -> float | None:
         """Poleward (PO) point (mlat, degrees)."""
         validate_kp(kp)
         validate_mlt(mlt)
@@ -65,7 +64,7 @@ class CarbaryAuroralModel:
         c0, c1 = coeffs
         return c0 + c1 * kp
 
-    def get_peak_intensity(self, kp: float, mlt: float) -> float | None:
+    def get_peak_intensity(self, kp: float, mlt: int) -> float | None:
         """Peak intensity (photons cm^-2 s)."""
         validate_kp(kp)
         validate_mlt(mlt)

@@ -6,11 +6,13 @@ Python implementation of the statistical Kp-based auroral oval model by **James 
 
 Implements the Model, described in the original Carbary J. F. publication "A Kp-based model of auroral boundaries" (SPACE WEATHER, VOL. 3, S10001, doi:10.1029/2005SW000162, 2005)
 
->Citation: Carbary, J. F. (2005), A Kp-based model of auroral boundaries, Space Weather, 3, S10001, doi:10.1029/2005SW000162.
+> Citation: Carbary, J. F. (2005), A Kp-based model of auroral boundaries, Space Weather, 3, S10001, doi:10.1029/2005SW000162.
+>
+> https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2005SW000162
 
 ## What this package does
 
-The statistical model allows calculation of the auroral boundaries at most MLTs as a function of Kp and can serve as an approximation to the shape and extent of the statistical oval. 
+The statistical model allows calculation of the auroral boundaries at most MLTs as a function of `Kp` and can serve as an approximation to the shape and extent of the statistical oval. 
 The model take Kp geomagnetic index and magnetic local time (mlt) as input and produce the peak, poleward and equatorward boundaries of the auroral oval.
 
 The relations are linear:
@@ -55,11 +57,37 @@ pip install carbary_auroral_model
 import datetime
 from carbary_model import AuroralBoundary
 
-boundary = AuroralBoundary(kp=5.2,
-                           ut_hours=datetime.datetime.now(datetime.UTC).hour,
-                           advanced_mode=True)
+
+current_date = datetime.datetime.now(datetime.UTC)
+oval = AuroralBoundary(kp=5.2,
+                       ut_hours=current_date.hour,
+                       advanced_mode=True,
+                       smooth_mode=0)
+data = {
+    "time": current_date.strftime(format="%d-%m-%Y %H:%M"),
+    "data": oval.intensity_map,
+    "data_raw": oval.raw_intensity_map
+}
 
 ```
+
+### FYI
+
+> According R&D tests **running the model with `strict_mode=False` is preferred**
+> Enabling strict=True may distort geographic boundaries
+>
+> As established in J. Carbary's original 2005 paper, the raw satellite images from the Polar Ultraviolet Imager. Polar Ultraviolet Imager. The pixel locations were transformed to **Corrected Geomagnetic Latitude (CGM-MLAT)**  and magnetic local time (MLT).
+> 
+> https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2005SW000162
+> 
+> The CGM coordinates description:
+> https://omniweb.gsfc.nasa.gov/vitmo/cgmm_des.html
+> 
+> Magnetic pole location:
+> https://www.ncei.noaa.gov/products/wandering-geomagnetic-poles
+> 
+> Kp Index info:
+> https://spaceweather.gfz-potsdam.de/products-data/forecasts/forecast-kp-index
 
 ## License
 MIT License.
