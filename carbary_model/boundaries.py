@@ -9,7 +9,7 @@ from carbary_model.carbary_model import CarbaryAuroralModel
 from carbary_model.types import AuroraBoundarySector, Point, AuroraBoundaryData, SmoothMode
 from carbary_model.const import GRAD_IN_SECTOR
 from carbary_model.utils import mlat_mlon_to_glat_approx, get_intense_gauss, get_intense_linear, get_mag_pole, \
-    glon_to_mlon_approx, get_geomag_pole, get_smooth_gauss, get_sun_mlon
+    glon_to_mlon_approx, get_smooth_gauss, get_sun_mlon
 
 
 class AuroralBoundary:
@@ -26,13 +26,11 @@ class AuroralBoundary:
                  kp: float,
                  ut_hours: float = 0.0,
                  advanced_mode: bool = False,
-                 strict_mode: bool = False,
                  smooth_mode: int = 0):
         """Auroral oval representation class constructor.
         :param kp: Kp value
         :param ut_hours: current time (hours)
         :param advanced_mode: Gaussian (if True) or linear interpolation in use
-        :param strict_mode: Magnetic jr GeoMagnetic Pole in use. False (default value) is preferable
         :param smooth_mode: Smooth mode for Intensity map. 0 - no smoothing, 1 or 2 - 1D or 2D smoothing in use
         """
         try:
@@ -41,7 +39,7 @@ class AuroralBoundary:
             raise UnexpectedError(f"Incorrect argument smooth_mode: {smooth_mode}") from exc
         self._is_advanced = advanced_mode
         self.ut_hours = ut_hours
-        self.pole = get_geomag_pole() if strict_mode else get_mag_pole()
+        self.pole = get_mag_pole()
         self.boundaries = {}
         self._model = CarbaryAuroralModel()
 

@@ -66,15 +66,6 @@ MIN_INTENSE: int = 4
 KP_MIN: float = 0.0
 KP_MAX: float = 9.0
 
-# Geomagnetic North Pole (2025)
-geo_mag_pole_lat: float = 80.85
-geo_mag_pole_lon: float = -72.76 + 360
-
-# WGS84 ellipsoid flattening factor
-WGS84_FLAT_COEF: float = 1 / 298.257223563
-
-WMM_COEF_DATA_SOURCE: str = "WMM.COF"
-
 # https://gml.noaa.gov/grad/solcalc/glossary.html
 # The solar declination varies from -23.44° at the (northern hemisphere) winter solstice,
 # through 0° at the vernal equinox, to +23.44° at the summer solstice

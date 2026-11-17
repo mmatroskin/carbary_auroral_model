@@ -21,7 +21,7 @@ from scipy.ndimage import gaussian_filter, gaussian_filter1d
 
 from carbary_model.exceptions import InvalidMLTError, InvalidKpError, UnexpectedError
 from carbary_model.const import MIN_INTENSE, MAG_POLE_LOCATION, MAG_POLE_LOCATION_DEFAULT, KP_MAX, KP_MIN, \
-    WMM_COEF_DATA_SOURCE, WGS84_FLAT_COEF, SUN_DECLINATION, GRAD_IN_SECTOR
+    SUN_DECLINATION, GRAD_IN_SECTOR
 from carbary_model.types import AuroraBoundarySector, Point
 
 
@@ -142,81 +142,6 @@ def get_mag_pole() -> Point:
 
     point = MAG_POLE_LOCATION.get(datetime.now(UTC).year) or MAG_POLE_LOCATION_DEFAULT
     return Point(**point)
-
-
-@functools.lru_cache(maxsize=1)
-def get_wmm_coeffs():
-    """Returns g10, g11, h11 from WMM.COF"""
-
-    file_name = pathlib.Path(__file__).parent.joinpath(WMM_COEF_DATA_SOURCE)
-    error_msg = f"{WMM_COEF_DATA_SOURCE} Processing Error"
-    with open(file_name) as fh:
-            lines = fh.read().splitlines()
-
-    try:
-        result = {"base_year": float(lines[0].split()[0])}
-    except ValueError:
-        raise UnexpectedError(error_msg)
-    for line in lines[1:3]:
-        parts = line.split()
-        if len(parts) >= 6:
-            try:
-               if int(parts[0]) == 1:
-                    m = int(parts[1])
-                    if m == 0:
-                        result["g10"] = float(parts[2])
-                        result["g10_ext"] = float(parts[4])
-                    elif m == 1:
-                        result["g11"] = float(parts[2])
-                        result["h11"] = float(parts[3])
-                        result["g11_ext"] = float(parts[4])
-                        result["h11_ext"] = float(parts[5])
-            except ValueError:
-                raise UnexpectedError(error_msg)
-    return result
-
-
-def get_decimal_year(date: datetime) -> float:
-    """Returns decimal year value
-        :param date: datetime (with UTC)
-        :returns: decimal year value (float)
-    """
-
-    start_year = datetime(date.year, 1, 1, tzinfo=UTC)
-    next_year = datetime(date.year + 1, 1, 1, tzinfo=UTC)
-    seconds_in_year = (next_year - start_year).total_seconds()
-    seconds = (date - start_year).total_seconds()
-
-    return date.year + (seconds / seconds_in_year)
-
-
-def get_geomag_pole(date: float | None = None) -> Point:
-    """Coordinates of North Geomagnetic Pole"""
-
-    date = date or get_decimal_year(datetime.now(UTC))
-    wmm_coeffs = get_wmm_coeffs()
-    delta = date - wmm_coeffs.get("base_year")
-
-    # Extrapolation
-    g10 = wmm_coeffs["g10"] + wmm_coeffs["g10_ext"] * delta
-    g11 = wmm_coeffs["g11"] + wmm_coeffs["g11_ext"] * delta
-    h11 = wmm_coeffs["h11"] + wmm_coeffs["h11_ext"] * delta
-
-    lon_rad = math.atan2(h11, g11)
-    lon = math.degrees(lon_rad)
-    lon = (lon + 180.0) % 360.0
-
-    h0 = math.sqrt(g10**2 + g11**2 + h11**2)
-    cos_colatitude = -g10 / h0
-    colatitude_rad = math.acos(cos_colatitude)
-    lat_geocentric = math.degrees(math.pi / 2 - colatitude_rad)
-
-    # Geocentric latitude to WGS84 latitude conversion
-    # First eccentricity squared of the WGS84 ellipsoid
-    e2 = 2 * WGS84_FLAT_COEF - WGS84_FLAT_COEF ** 2
-    lat_rad = math.atan(math.tan(math.radians(lat_geocentric)) / (1 - e2))
-
-    return Point(lat=math.degrees(lat_rad), lon=lon)
 
 
 def get_sun_declination(day_num: int | None = None) -> float:

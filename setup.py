@@ -4,7 +4,7 @@ import setuptools
 from carbary_model.__version__ import version
 
 
-package_data = {"carbary_auroral_model": ["CHANGELOG.md", "LICENSE", "WWM.COF"]}
+package_data = {"carbary_auroral_model": ["CHANGELOG.md", "LICENSE"]}
 readme = pathlib.Path("README.md").read_text()
 history = pathlib.Path("CHANGELOG.md").read_text()
 description = f"{readme}\n\n## Changelog\n\n{history}"

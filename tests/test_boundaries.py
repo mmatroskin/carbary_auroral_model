@@ -4,16 +4,15 @@ import pytest
 from carbary_model import AuroralBoundary
 
 
-@pytest.mark.parametrize("strict_mode", [True, False])
-def test_auroral_boundary_sectors(strict_mode):
-    boundary = AuroralBoundary(kp=5.2, ut_hours=12.0, strict_mode=strict_mode)
+def test_auroral_boundary_sectors():
+    boundary = AuroralBoundary(kp=5.2, ut_hours=12.0)
 
     assert len(boundary.boundaries) == 360
 
 
-@pytest.mark.parametrize("strict_mode", [True, False])
-def test_auroral_boundary_points(strict_mode):
-    boundary = AuroralBoundary(kp=5.2, ut_hours=0.0, strict_mode=strict_mode)
+@pytest.mark.parametrize("shift", [0, 180])
+def test_auroral_boundary_points(shift):
+    boundary = AuroralBoundary(kp=5.2, ut_hours=0.0)
     assert len(boundary.boundaries) == 360
     res = []
     for k, v in boundary.boundaries.items():
@@ -21,23 +20,18 @@ def test_auroral_boundary_points(strict_mode):
             res.append(k)
     assert len(res) > 0
 
-    initial = 0
-    shift = 180
-
-    sector = boundary.boundaries[initial]
-
-    assert sector.peak is not None
-    assert 0 <= sector.peak.lon <= 359
-    assert 0 <= sector.peak.lat <= 90
-
     sector = boundary.boundaries[shift]
 
-    assert sector.peak is None
+    if shift:
+        assert sector.peak is None
+    else:
+        assert sector.peak is not None
+        assert 0 <= sector.peak.lon <= 359
+        assert 0 <= sector.peak.lat <= 90
 
 
-@pytest.mark.parametrize("strict_mode", [True, False])
-def test_auroral_boundary_intensity_map(strict_mode):
-    boundary = AuroralBoundary(kp=5.2, strict_mode=strict_mode)
+def test_auroral_boundary_intensity_map():
+    boundary = AuroralBoundary(kp=5.2)
 
     assert isinstance(boundary.intensity_map, np.ndarray)
     assert boundary.intensity_map.ndim == 2

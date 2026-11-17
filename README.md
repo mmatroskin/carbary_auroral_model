@@ -62,7 +62,6 @@ current_date = datetime.datetime.now(datetime.UTC)
 oval = AuroralBoundary(kp=5.2,
                        ut_hours=current_date.hour,
                        advanced_mode=True,
-                       strict_mode=False,
                        smooth_mode=0)
 data = {
     "time": current_date.strftime(format="%d-%m-%Y %H:%M"),
@@ -74,12 +73,10 @@ data = {
 
 ### FYI
 
-> Note on Coordinate Systems: Dynamic Geomagnetic Pole calculation via WMM Gauss coefficients was excluded from the 0.1.0 release. R&D validation confirmed that the default Magnetic Dip Pole framework yields more consistent results with the original Carbary (2005) model. The selection pole types code is preserved in the `feature/pole_variety_dev` branch for reference.
+> Note on Coordinate Systems: Dynamic Geomagnetic Pole calculation via WMM Gauss coefficients was excluded from the 0.1.0 release. R&D validation confirmed that the default Magnetic Dip Pole framework yields more consistent results with the original Carbary (2005) model. The selection pole types code is preserved in the `feature/pole-variety-dev` branch for reference.
 >
 > The selection pole types feature included in 0.1.1.dev0 release
-> 
-> According R&D tests **running the model with `strict_mode=False` is preferred**
-> 
+>
 > As established in J. Carbary's original 2005 paper, the raw satellite images from the Polar Ultraviolet Imager. Polar Ultraviolet Imager. The pixel locations were transformed to **Corrected Geomagnetic Latitude (CGM-MLAT)**  and magnetic local time (MLT).
 > 
 > https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2005SW000162
