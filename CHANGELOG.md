@@ -8,7 +8,7 @@
 - Since now Auroral Oval position related on Pole and Sun Position
 - Detailed Magnetic Pole locations (2025-2030)
 #### added
-= Smoothing for Intensity map representation
+- Smoothing for Intensity map representation
 - Tests
 #### fixed
 - Geographic - Magnetic coordinates conversion
